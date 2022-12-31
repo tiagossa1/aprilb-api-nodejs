@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_CONNECTION_STRING")
+}
+
+model Contact {
+  id              Int        @id @default(autoincrement())
+  address         String     @db.VarChar(255)
+  number          String     @db.VarChar(9)
+  landline_number String?    @db.VarChar(9)
+  email           String?    @db.VarChar(255)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  member          Member?
+  nonMember       NonMember?
+}
+
+model Member {
+  id         Int          @id
+  name       String       @db.VarChar(255)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  contactId  Int          @unique
+  contact    Contact      @relation(fields: [contactId], references: [id])
+  fee        Fee[]
+  memberTrip MemberTrip[]
+}
+
+model NonMember {
+  id            Int             @id @default(autoincrement())
+  name          String          @db.VarChar(255)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  contactId     Int             @unique
+  contact       Contact         @relation(fields: [contactId], references: [id])
+  nonMemberTrip NonMemberTrip[]
+}
+
+model Trip {
+  id                 Int             @id @default(autoincrement())
+  name               String          @db.VarChar(255)
+  tripTypeCode       String
+  tripPosterFileName String?         @db.VarChar(255)
+  destination        String          @db.VarChar(255)
+  description        String?         @db.VarChar(255)
+  totalSeats         Int
+  date               DateTime
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  tripType           TripType        @relation(fields: [tripTypeCode], references: [code])
+  memberTrip         MemberTrip[]
+  nonMemberTrip      NonMemberTrip[]
+}
+
+model MemberTrip {
+  memberId      Int
+  tripId        Int
+  reservedSeats Int
+  paidAmount    Decimal  @db.Decimal(18, 2)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  member        Member   @relation(fields: [memberId], references: [id])
+  trip          Trip     @relation(fields: [tripId], references: [id])
+
+  @@id([memberId, tripId])
+}
+
+model NonMemberTrip {
+  nonMemberId   Int
+  tripId        Int
+  reservedSeats Int
+  paidAmount    Decimal   @db.Decimal(18, 2)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  nonMember     NonMember @relation(fields: [nonMemberId], references: [id])
+  trip          Trip      @relation(fields: [tripId], references: [id])
+
+  @@id([nonMemberId, tripId])
+}
+
+model TripType {
+  code      String   @id @db.VarChar(255)
+  name      String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+  trips     Trip[]
+}
+
+model Fee {
+  id         Int      @id @default(autoincrement())
+  year       Int
+  paidAmount Decimal  @db.Decimal(4, 2)
+  memberId   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  member     Member   @relation(fields: [memberId], references: [id])
+}
+
+model User {
+  email     String   @id @db.VarChar(100)
+  name      String   @db.VarChar(100)
+  password  String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  roleCode  String
+  role      Role     @relation(fields: [roleCode], references: [code])
+}
+
+model Role {
+  code        String   @id @db.VarChar(100)
+  name        String   @db.VarChar(100)
+  description String?  @db.VarChar(200)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
+}

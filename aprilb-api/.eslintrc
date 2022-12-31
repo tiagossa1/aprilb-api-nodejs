@@ -1,0 +1,13 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "lodash"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:security/recommended",
+    "plugin:lodash/recommended",
+    "plugin:unicorn/recommended",
+    "prettier"
+  ]
+}
